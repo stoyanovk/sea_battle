@@ -12,13 +12,7 @@ export interface IShipCreator {
   shipCount: number;
   generateShips: () => void;
   generateShipLocation: (shipLength: number) => Location;
-  checkCollision: ({
-    ships,
-    location,
-  }: {
-    ships: IShip[];
-    location: Location;
-  }) => void;
+  checkCollision: (newShip: IShip) => void;
   getForbiddenZone: (value: Coordinate) => Location;
 }
 

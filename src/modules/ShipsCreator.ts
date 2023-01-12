@@ -32,9 +32,9 @@ export class ShipsCreator implements IShipCreator {
     const pushShips = (shipSize) => {
       if (shipsTypeCount[shipSize] > 0) {
         // it work if ship count > 0
-        const location = this.generateShipLocation(shipSize);
-        if (!this.checkCollision({ ships: this.ships, location })) {
-          this.ships.push(new Ship(location));
+        const newShip = new Ship(this.generateShipLocation(shipSize));
+        if (!this.checkCollision(newShip)) {
+          this.ships.push(newShip);
           shipsTypeCount[shipSize] = shipsTypeCount[shipSize] - 1; // if everything ok we decrease count
         }
       }
@@ -50,21 +50,21 @@ export class ShipsCreator implements IShipCreator {
 
   generateShipLocation(shipLength): Location {
     const { random, round, floor } = Math;
-    // 1 - vertical, 2 - horizontal;
+    // 0 - vertical, 1 - horizontal;
     const direction = round(random()); // 0 || 1
-    const startCoordinate = floor(random() * this.boardSize);
-    const endCoordinate = floor(random() * (this.boardSize - shipLength));
-    const row = (!!direction ? startCoordinate : endCoordinate) + 1; // plus 1 need that row not to be 0
-    const column = (!!direction ? endCoordinate : startCoordinate) + 1; // plus 1 need that column not to be 0
+    const xCoordinate = floor(random() * this.boardSize);
+    const yCoordinate = floor(random() * (this.boardSize - shipLength));
+    const row = (!!direction ? xCoordinate : yCoordinate) + 1; // plus 1 need that row not to be 0
+    const column = (!!direction ? yCoordinate : xCoordinate) + 1; // plus 1 need that column not to be 0
 
     return range(shipLength).map((_, i): Coordinate => {
       return !!direction ? `${row}-${column + i}` : `${row + i}-${column}`;
     });
   }
 
-  checkCollision({ ships, location }) {
-    if (!ships.length) return false;
-    const shipsPlaces = ships.reduce((acc, item) => {
+  checkCollision(newShip) {
+    if (!this.ships.length) return false;
+    const shipsPlaces = this.ships.reduce((acc, item) => {
       // I get all ships places
       return [...acc, ...item.location];
     }, []);
@@ -76,9 +76,9 @@ export class ShipsCreator implements IShipCreator {
 
     const forbiddenZoneSet = new Set(forbiddenZone); // drop duplicates
 
-    for (let i = 0; i < location.length; i++) {
+    for (let i = 0; i < newShip.location.length; i++) {
       // check each location in  forbiddenZone
-      if (forbiddenZoneSet.has(location[i])) return true;
+      if (forbiddenZoneSet.has(newShip.location[i])) return true;
     }
     return false;
   }
