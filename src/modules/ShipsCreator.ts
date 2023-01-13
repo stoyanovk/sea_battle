@@ -1,5 +1,5 @@
 import { IShip, IShipCreator, Location, Coordinate } from "../interfaces";
-import { BOARD_SIZE, range } from "../utils";
+import { BOARD_SIZE, range, getLoopFuse } from "../utils";
 
 class Ship implements IShip {
   location: Location;
@@ -20,15 +20,19 @@ export class ShipsCreator implements IShipCreator {
     this.generateShips();
   }
 
-  generateShips() {
+  getInitialShipsCounter() {
     // ships and their count
-    const shipsTypeCount = {
+    return {
       1: 4, // single ship
       2: 3, // double ship
       3: 2, // triple ship
       4: 1, // ship for 4 places
     };
+  }
 
+  generateShips() {
+    const loopFuse = getLoopFuse(20);
+    let shipsTypeCount = this.getInitialShipsCounter();
     const pushShips = (shipSize) => {
       if (shipsTypeCount[shipSize] > 0) {
         // it work if ship count > 0
@@ -41,10 +45,18 @@ export class ShipsCreator implements IShipCreator {
     };
 
     while (this.ships.length < this.shipCount) {
-      pushShips(1);
-      pushShips(2);
-      pushShips(3);
+      loopFuse.increaseCount();
+
       pushShips(4);
+      pushShips(3);
+      pushShips(2);
+      pushShips(1);
+      if (loopFuse.isLoopEnded()) {
+        console.log("something went wrong");
+        this.ships = [];
+        loopFuse.resetCount();
+        shipsTypeCount = this.getInitialShipsCounter();
+      }
     }
   }
 
